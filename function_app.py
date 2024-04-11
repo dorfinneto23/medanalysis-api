@@ -6,6 +6,9 @@ import pymssql
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
+database = 'medicalanalysis'
+username = 'sysadmin'
+password = 'Qaz1057!@#'
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
