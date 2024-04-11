@@ -19,7 +19,7 @@ def create_case_in_database(casename):
         cursor = conn.cursor()
 
         # Insert new case data into the 'cases' table
-        cursor.execute("INSERT INTO cases (casename, status) VALUES (?, ?)", (casename, 1))
+        cursor.execute("INSERT INTO cases (name, status) VALUES (?, ?)", (casename, 1))
         conn.commit()
 
         # Close connections
