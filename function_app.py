@@ -1,13 +1,14 @@
 import azure.functions as func
 import logging
 import pyodbc
+import os
 
 
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
 database = 'medicalanalysis'
-username = 'sysadmin'
+username = os.environ.get('sql_username')
 password = 'Qaz1057!@#'
 driver= '{ODBC Driver 18 for SQL Server}'
 
