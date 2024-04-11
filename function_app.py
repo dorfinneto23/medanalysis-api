@@ -11,6 +11,28 @@ username = 'sysadmin'
 password = 'Qaz1057!@#'
 driver= '{ODBC Driver 17 for SQL Server}'
 
+# Function to create a new case in the 'cases' table
+def create_case_in_database(casename):
+    try:
+        # Establish a connection to the Azure SQL database
+        conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+        cursor = conn.cursor()
+
+        # Insert new case data into the 'cases' table
+        cursor.execute("INSERT INTO cases (casename, status) VALUES (?, ?)", (casename, 1))
+        conn.commit()
+
+        # Close connections
+        cursor.close()
+        conn.close()
+        
+        logging.info("New case created successfully in the 'cases' table.")
+        return True
+    except Exception as e:
+        logging.error(f"Error creating case: {str(e)}")
+        return False
+
+# Define the Azure Function
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
