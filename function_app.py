@@ -36,10 +36,20 @@ def create_case_in_database(casename):
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
-@app.route(route="v1/case/create", methods=['GET'])
+@app.route(route="v1/case/create", methods=['POST'])
 def create_case(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request for creating a case.')
-    return func.HttpResponse("Hi Broder", status_code=200)
+    # Extract casename from the request
+    casename = req.params.get('casename')
+    # Check if casename is provided
+    if not casename:
+        return func.HttpResponse("Parameter 'casename' is missing in the request.", status_code=400)
+    
+    # Create the case in the database
+    if create_case_in_database(casename):
+        return func.HttpResponse("Case created successfully.", status_code=200)
+    else:
+        return func.HttpResponse("Failed to create case.", status_code=500)
 
 @app.route(route="v1")
 def v1(req: func.HttpRequest) -> func.HttpResponse:
