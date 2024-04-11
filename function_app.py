@@ -9,7 +9,7 @@ server = 'medicalanalysis-sqlserver.database.windows.net'
 database = 'medicalanalysis'
 username = 'sysadmin'
 password = 'Qaz1057!@#'
-driver= '{ODBC Driver 17 for SQL Server}'
+driver= '{ODBC Driver 18 for SQL Server}'
 
 # Function to create a new case in the 'cases' table
 def create_case_in_database(casename):
@@ -19,8 +19,7 @@ def create_case_in_database(casename):
         cursor = conn.cursor()
 
         # Insert new case data into the 'cases' table
-        #cursor.execute("INSERT INTO cases (name, status) VALUES (?, ?)", (casename, 1))
-        cursor.execute("INSERT INTO cases (name, status) VALUES ('dddddd', 1)")
+        cursor.execute("INSERT INTO cases (name, status) VALUES (?, ?)", (casename, 1))
         conn.commit()
 
         # Close connections
