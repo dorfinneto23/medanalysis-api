@@ -1,6 +1,6 @@
 import azure.functions as func
 import logging
-import pymssql
+import pyodbc
 
 
 
@@ -9,6 +9,7 @@ server = 'medicalanalysis-sqlserver.database.windows.net'
 database = 'medicalanalysis'
 username = 'sysadmin'
 password = 'Qaz1057!@#'
+driver= '{ODBC Driver 17 for SQL Server}'
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
