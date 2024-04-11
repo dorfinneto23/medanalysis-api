@@ -1,5 +1,7 @@
 import azure.functions as func
 import logging
+import pymssql
+
 
 
 # Define connection details
