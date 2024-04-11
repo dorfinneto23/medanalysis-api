@@ -9,7 +9,7 @@ import os
 server = 'medicalanalysis-sqlserver.database.windows.net'
 database = 'medicalanalysis'
 username = os.environ.get('sql_username')
-password = 'Qaz1057!@#'
+password = os.environ.get('sql_password')
 driver= '{ODBC Driver 18 for SQL Server}'
 
 # Function to create a new case in the 'cases' table
