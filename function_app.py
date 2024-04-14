@@ -51,7 +51,12 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     case_id = create_case_in_database(casename)
     if case_id is not None:
         logging.info(f"case_id contains data , the value is:{case_id}")
-        return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
+        #return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
+        data = { 
+            "caseid" : {case_id}, 
+            "Subject" : "Case created successfully", 
+        } 
+        return func.HttpResponse(jsonify(data), status_code=200)
     else:
         return func.HttpResponse("Failed to create case.", status_code=500)
 
