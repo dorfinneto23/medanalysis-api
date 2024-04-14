@@ -2,6 +2,7 @@ import azure.functions as func
 import logging
 import pyodbc
 import os
+from flask import jsonify
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
