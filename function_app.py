@@ -2,9 +2,6 @@ import azure.functions as func
 import logging
 import pyodbc
 import os
-import json
-
-
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
