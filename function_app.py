@@ -2,6 +2,7 @@ import azure.functions as func
 import logging
 import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
+import json
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
