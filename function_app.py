@@ -52,11 +52,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse("Parameter 'casename' is missing in the request.", status_code=400)
     case_id = create_case_in_database(casename)
     if case_id is not None:
-        response_body = {
-            "caseid": case_id,
-            "message": f"Case {case_id} created successfully."
-        }
-        return func.HttpResponse(json.dumps(response_body), status_code=200, mimetype="application/json")
+        return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
     else:
         return func.HttpResponse("Failed to create case.", status_code=500)
 
