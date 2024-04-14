@@ -39,7 +39,7 @@ def create_case_in_database(casename):
         return None
 
 # Define the Azure Function
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.function)
 
 
 @app.route(route="v1/case/create", methods=['POST'])
