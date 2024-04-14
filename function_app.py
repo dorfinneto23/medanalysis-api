@@ -52,8 +52,9 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     if case_id is not None:
         logging.info(f"case_id contains data , the value is:{case_id}")
         #return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
+        case_id_float = float(case_id)
         data = { 
-            "caseid" : case_id, 
+            "caseid" : case_id_float, 
             "Subject" : "Case created successfully!" 
         } 
         json_data = json.dumps(data)
