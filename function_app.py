@@ -2,7 +2,7 @@ import azure.functions as func
 import logging
 import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
-import json
+import json # in order to use json 
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
@@ -51,10 +51,9 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     case_id = create_case_in_database(casename)
     if case_id is not None:
         logging.info(f"case_id contains data , the value is:{case_id}")
-        #return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
-        case_id_float = float(case_id)
+        case_id_int = int(case_id)
         data = { 
-            "caseid" : case_id_float, 
+            "caseid" : case_id_int, 
             "Subject" : "Case created successfully!" 
         } 
         json_data = json.dumps(data)
