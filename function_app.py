@@ -53,7 +53,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(f"case_id contains data , the value is:{case_id}")
         #return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
         data = { 
-            "caseid" : {case_id}, 
+            "caseid" : case_id, 
             "Subject" : "Case created successfully" 
         } 
         return func.HttpResponse(jsonify(data), status_code=200)
