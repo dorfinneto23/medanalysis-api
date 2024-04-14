@@ -54,7 +54,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
         #return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
         data = { 
             "caseid" : case_id, 
-            "Subject" : "Case created successfully" 
+            "Subject" : "Case created successfully!" 
         } 
         return func.HttpResponse(body=data, status_code=200,mimetype="application/json")
     else:
