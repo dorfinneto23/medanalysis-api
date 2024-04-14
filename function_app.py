@@ -1,7 +1,7 @@
 import azure.functions as func
 import logging
-import pyodbc
-import os
+import pyodbc #for sql connections 
+import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 from flask import jsonify
 
 # Define connection details
@@ -47,12 +47,12 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     casename = req.params.get('casename')
     # Check if casename is provided
     if not casename:
-        return func.HttpResponse("Parameter 'casename' is missing in the request.", status_code=400)
+        return func.HttpResponse(jsonify({"error": "Parameter 'casename' is missing in the request."}), status_code=400)
     case_id = create_case_in_database(casename)
     if case_id is not None:
-        return func.HttpResponse(f"Case {case_id} created successfully.", status_code=200)
+        return func.HttpResponse(jsonify({"message": f"Case {case_id} created successfully."}), status_code=200)
     else:
-        return func.HttpResponse("Failed to create case.", status_code=500)
+        return func.HttpResponse(jsonify({"error": "Failed to create case."}), status_code=500)
 
 @app.route(route="v1")
 def v1(req: func.HttpRequest) -> func.HttpResponse:
