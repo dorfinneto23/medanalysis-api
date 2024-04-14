@@ -56,7 +56,8 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
             "caseid" : case_id, 
             "Subject" : "Case created successfully" 
         } 
-        return func.HttpResponse(jsonify(data), status_code=200)
+        jsonResult = jsonify(data)
+        return func.HttpResponse(jsonResult, status_code=200)
     else:
         return func.HttpResponse("Failed to create case.", status_code=500)
 
