@@ -12,14 +12,14 @@ password = os.environ.get('sql_password')
 driver= '{ODBC Driver 18 for SQL Server}'
 
 # Function to create a new case in the 'cases' table
-def create_case_in_database(casename):
+def create_case_in_database(casename,userid):
     try:
         # Establish a connection to the Azure SQL database
         conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
         cursor = conn.cursor()
 
         # Insert new case data into the 'cases' table
-        cursor.execute("INSERT INTO cases (name, status,userid) VALUES (?, ?, ?)", (casename, 1,1))
+        cursor.execute("INSERT INTO cases (name, status,userid) VALUES (?, ?, ?)", (casename, 1,userid))
         conn.commit()
 
         # Get the ID of the last inserted row
@@ -45,12 +45,14 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request for creating a case.')
     # Extract casename from the request
     casename = req.params.get('casename')
+    userid = req.params.get('userid')
     # Check if casename is provided
     if not casename:
         return func.HttpResponse("Parameter 'casename' is missing in the request.", status_code=400)
-    case_id = create_case_in_database(casename)
+    case_id = create_case_in_database(casename,userid)
     if case_id is not None:
         logging.info(f"case_id contains data , the value is:{case_id}")
+        # prepare json data
         case_id_int = int(case_id)
         data = { 
             "caseid" : case_id_int, 
