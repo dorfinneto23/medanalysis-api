@@ -2,7 +2,6 @@ import azure.functions as func
 import logging
 import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
-from flask import jsonify  #package in order to use json , return json to client for example
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
