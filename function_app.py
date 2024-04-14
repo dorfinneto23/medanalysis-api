@@ -2,7 +2,7 @@ import azure.functions as func
 import logging
 import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
-from flask import jsonify
+from flask import jsonify #package in order to use json , return json to client for example
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
@@ -50,6 +50,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(jsonify({"error": "Parameter 'casename' is missing in the request."}), status_code=400)
     case_id = create_case_in_database(casename)
     if case_id is not None:
+        logging.info(f"case_id contains data , the value is:{case_id}")
         return func.HttpResponse(jsonify({"message": f"Case {case_id} created successfully."}), status_code=200)
     else:
         return func.HttpResponse(jsonify({"error": "Failed to create case."}), status_code=500)
