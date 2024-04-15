@@ -41,13 +41,15 @@ def create_case_in_database(casename,userid):
         return None
 
 # Function to upload a PDF file to Azure Blob Storage
-def upload_to_blob_storage(file_stream, filename, container_name):
+def upload_to_blob_storage(file_stream, filename):
     try:
+        container_name = "medicalanalysis"
+        folder_name = "cases"
         blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
         container_client = blob_service_client.get_container_client(container_name)
         
         # Upload the file to Azure Blob Storage
-        blob_client = container_client.upload_blob(name=filename, data=file_stream)
+        blob_client = container_client.upload_blob(name=f"{folder_name}/{filename}", data=file_stream)
         
         return blob_client.url
     except Exception as e:
@@ -60,7 +62,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 @app.route(route="v1/case/create", methods=['POST'])
 def create_case(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request for creating a case.')
-    # Extract casename from the request
+    # Extract casename & userid from the request
     casename = req.params.get('casename')
     userid = req.params.get('userid')
     # Check if casename is provided
@@ -79,7 +81,27 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
     else:
         return func.HttpResponse("Failed to create case.", status_code=500)
+    
+@app.route(route="v1/case/uploadfile", methods=['POST'])
+def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        # Check if file is included in the request
+        if 'file' not in req.files:
+            return func.HttpResponse("No file provided in the request.", status_code=400)
 
+        file = req.files['file']
+        file_name = file.filename
+        
+        # Upload the file to Azure Blob Storage
+        blob_url = upload_to_blob_storage(file, file_name)
+
+        if blob_url:
+            return func.HttpResponse(f"File uploaded successfully. Blob URL: {blob_url}", status_code=200)
+        else:
+            return func.HttpResponse("Failed to upload file to Azure Blob Storage.", status_code=500)
+    except Exception as e:
+        return func.HttpResponse(str(e), status_code=500)
+    
 @app.route(route="v1")
 def v1(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
