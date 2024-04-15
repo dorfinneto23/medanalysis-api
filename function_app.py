@@ -5,6 +5,9 @@ import os #in order to get parameters values from azure function app enviroment 
 import json # in order to use json 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
+# Azure Blob Storage connection string
+connection_string_blob = os.environ.get('BlobStorageConnString')
+
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
 database = 'medicalanalysis'
@@ -36,6 +39,19 @@ def create_case_in_database(casename,userid):
     except Exception as e:
         logging.error(f"Error creating case: {str(e)}")
         return None
+
+# Function to upload a PDF file to Azure Blob Storage
+def upload_to_blob_storage(file_stream, filename, container_name):
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
+        container_client = blob_service_client.get_container_client(container_name)
+        
+        # Upload the file to Azure Blob Storage
+        blob_client = container_client.upload_blob(name=filename, data=file_stream)
+        
+        return blob_client.url
+    except Exception as e:
+        return str(e)
 
 # Define the Azure Function
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
