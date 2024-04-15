@@ -3,7 +3,7 @@ import logging
 import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 import json # in order to use json 
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient # in order to use azure container storage
 
 # Azure Blob Storage connection string
 connection_string_blob = os.environ.get('BlobStorageConnString')
@@ -85,6 +85,10 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="v1/case/uploadfile", methods=['POST'])
 def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('starting upload file request')
+    # Extract caseid from the request
+    caseid = req.params.get('caseid')
+    if not caseid:
+        return func.HttpResponse("Parameter 'caseid' is missing in the request.", status_code=400)
     try:
         # Check if file is included in the request
         if 'file' not in req.files:
