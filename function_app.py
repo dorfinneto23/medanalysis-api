@@ -84,6 +84,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     
 @app.route(route="v1/case/uploadfile", methods=['POST'])
 def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('starting upload file request')
     try:
         # Check if file is included in the request
         if 'file' not in req.files:
