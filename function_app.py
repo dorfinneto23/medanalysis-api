@@ -3,6 +3,7 @@ import logging
 import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 import json # in order to use json 
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
