@@ -50,7 +50,7 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         container_client = blob_service_client.get_container_client(container_name)
         
         # Upload the file to Azure Blob Storage
-        blob_client = container_client.upload_blob(name=f"{main_folder_name}/{main_folder_name}/{filename}", data=file_stream)
+        blob_client = container_client.upload_blob(name=f"{main_folder_name}/{folder_name}/{filename}", data=file_stream)
         
         return blob_client.url
     except Exception as e:
