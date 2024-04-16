@@ -41,15 +41,16 @@ def create_case_in_database(casename,userid):
         return None
 
 # Function to upload a PDF file to Azure Blob Storage
-def upload_to_blob_storage(file_stream, filename):
+def upload_to_blob_storage(file_stream, filename,caseid):
     try:
         container_name = "medicalanalysis"
-        folder_name = "cases"
+        main_folder_name = "cases"
+        folder_name="case-"+caseid
         blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
         container_client = blob_service_client.get_container_client(container_name)
         
         # Upload the file to Azure Blob Storage
-        blob_client = container_client.upload_blob(name=f"{folder_name}/{filename}", data=file_stream)
+        blob_client = container_client.upload_blob(name=f"{main_folder_name}/{main_folder_name}/{filename}", data=file_stream)
         
         return blob_client.url
     except Exception as e:
@@ -98,7 +99,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         file_name = file.filename
         
         # Upload the file to Azure Blob Storage
-        blob_url = upload_to_blob_storage(file, file_name)
+        blob_url = upload_to_blob_storage(file, file_name,caseid)
 
         if blob_url:
             return func.HttpResponse(f"File uploaded successfully. Blob URL: {blob_url}", status_code=200)
