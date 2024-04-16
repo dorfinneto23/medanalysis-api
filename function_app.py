@@ -123,9 +123,12 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         blob_url = upload_to_blob_storage(file, file_name,caseid)
 
         if blob_url:
+            #update case status = 2 (uploaded)
             updatestatus = update_case_status(caseid,2)
             return func.HttpResponse(f"File uploaded successfully. Blob URL: {blob_url} and case status updated {updatestatus}", status_code=200)
         else:
+            #update case status = 3 (Upload failed)
+            updatestatus = update_case_status(caseid,3)
             return func.HttpResponse("Failed to upload file to Azure Blob Storage.", status_code=500)
     except Exception as e:
         return func.HttpResponse(str(e), status_code=500)
