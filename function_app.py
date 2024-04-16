@@ -40,6 +40,27 @@ def create_case_in_database(casename,userid):
         logging.error(f"Error creating case: {str(e)}")
         return None
 
+# Function to update case status in the 'cases' table
+def update_case_status(caseid,statusid):
+    try:
+        # Establish a connection to the Azure SQL database
+        conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+        cursor = conn.cursor()
+
+        # Insert new case data into the 'cases' table
+        cursor.execute("UPDATE cases SET status = ? WHERE id = ?", (statusid, caseid))
+        conn.commit()
+
+        # Close connections
+        cursor.close()
+        conn.close()
+        
+        logging.info("case status updated")
+        return True
+    except Exception as e:
+        logging.error(f"Error update case: {str(e)}")
+        return False
+
 # Function to upload a PDF file to Azure Blob Storage
 def upload_to_blob_storage(file_stream, filename,caseid):
     try:
