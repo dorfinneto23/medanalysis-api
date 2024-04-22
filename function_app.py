@@ -126,12 +126,14 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         file_name = file.filename
         
         # Upload the file to Azure Blob Storage
-        blob_url = upload_to_blob_storage(file, file_name,caseid)
+        uploadtatus = upload_to_blob_storage(file, file_name,caseid)
 
-        if blob_url:
+        if uploadtatus == "fileExist":
+            return func.HttpResponse(f"file exists", status_code=200)
+        elif uploadtatus:
             #update case status = 2 (uploaded)
             updatestatus = update_case_status(caseid,2)
-            return func.HttpResponse(f"File uploaded successfully. Blob URL: {blob_url} and case status updated {updatestatus}", status_code=200)
+            return func.HttpResponse(f"File uploaded successfully. Blob URL: {uploadtatus} and case status updated {updatestatus}", status_code=200)
         else:
             #update case status = 3 (Upload failed)
             updatestatus = update_case_status(caseid,3)
