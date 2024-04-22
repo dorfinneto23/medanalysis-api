@@ -75,7 +75,6 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         logging.info(f"file uploaded succeeded: {blob_client.ErrorCode}")
         return blob_client.url
     except Exception as e:
-        logging.info(f"file uploaded failed : {blob_client.ErrorCode}")
         return str(e)
 
 # Define the Azure Function
