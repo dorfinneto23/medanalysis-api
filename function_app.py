@@ -75,7 +75,10 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         logging.info(f"file uploaded succeeded: {blob_client.ErrorCode}")
         return blob_client.url
     except Exception as e:
-        return str(e)
+        if getattr(e, 'ErrorCode', None) == "BlobAlreadyExists":
+            return "FileExists"
+        else:
+            return str(e)
 
 # Define the Azure Function
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
