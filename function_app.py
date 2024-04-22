@@ -69,16 +69,15 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         folder_name="case-"+caseid
         blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
         container_client = blob_service_client.get_container_client(container_name)
-        
+        path = f"{main_folder_name}/{folder_name}/{filename}"
+        fileExist = os.path.exists(path)
+        logging.info(f"cfileExist value is: {fileExist}")
         # Upload the file to Azure Blob Storage
-        blob_client = container_client.upload_blob(name=f"{main_folder_name}/{folder_name}/{filename}", data=file_stream)
+        blob_client = container_client.upload_blob(name=path, data=file_stream)
         logging.info(f"file uploaded succeeded: {blob_client.ErrorCode}")
         return blob_client.url
     except Exception as e:
-        if getattr(e, 'ErrorCode', None) == "BlobAlreadyExists":
-            return "FileExists"
-        else:
-            return str(e)
+        return str(e)
 
 # Define the Azure Function
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
