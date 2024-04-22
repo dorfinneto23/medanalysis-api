@@ -69,7 +69,8 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         folder_name="case-"+caseid
         blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
         container_client = blob_service_client.get_container_client(container_name)
-        path = f"{main_folder_name}/{folder_name}/{filename}"
+        path = f"/{main_folder_name}/{folder_name}/{filename}"
+        #check if file Exists
         fileExist = os.path.exists(path)
         logging.info(f"cfileExist value is: {fileExist}")
         # Upload the file to Azure Blob Storage
