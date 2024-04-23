@@ -141,15 +141,30 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         elif uploadtatus=="uploaded":
             #update case status = 2 (uploaded)
             updatestatus = update_case_status(caseid,2)
-            return func.HttpResponse(f"File uploaded successfully and case status updated {updatestatus}", status_code=200)
+            data = { 
+            "status" : "uploaded", 
+            "Description" : f"File uploaded successfully and case status updated to: {updatestatus} " 
+             } 
+            json_data = json.dumps(data)
+            return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
         elif uploadtatus=="uploadfailed":
             #update case status = 3 (Upload failed)
             updatestatus = update_case_status(caseid,3)
-            return func.HttpResponse("Failed to upload file to Azure Blob Storage.", status_code=500)
+            data = { 
+            "status" : "uploadfailed", 
+            "Description" : f"File uploaded failed and case status updated to: {updatestatus} " 
+             } 
+            json_data = json.dumps(data)
+            return func.HttpResponse(body=json_data, status_code=500,mimetype="application/json")
         else:
             #update case status = 3 (Upload failed)
             updatestatus = update_case_status(caseid,3)
-            return func.HttpResponse("Failed to upload file - Unexpected error", status_code=500)
+            data = { 
+            "status" : "uploadfailed", 
+            "Description" : f"Failed to upload file - Unexpected error and case status updated to: {updatestatus} " 
+             } 
+            json_data = json.dumps(data)
+            return func.HttpResponse(body=json_data, status_code=500,mimetype="application/json")
     except Exception as e:
         return func.HttpResponse(str(e), status_code=500)
     
