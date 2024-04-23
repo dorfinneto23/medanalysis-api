@@ -39,27 +39,6 @@ def create_case_in_database(casename,userid):
     except Exception as e:
         logging.error(f"Error creating case: {str(e)}")
         return None
-
-# Function to update case status in the 'cases' table
-def update_case_status(caseid,statusid):
-    try:
-        # Establish a connection to the Azure SQL database
-        conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-        cursor = conn.cursor()
-
-        # Insert new case data into the 'cases' table
-        cursor.execute("UPDATE cases SET status = ? WHERE id = ?", (statusid, caseid))
-        conn.commit()
-
-        # Close connections
-        cursor.close()
-        conn.close()
-        
-        logging.info("case status updated")
-        return True
-    except Exception as e:
-        logging.error(f"Error update case: {str(e)}")
-        return False
     
 # Generic Function to update case  in the 'cases' table
 def update_case_generic(caseid,field,value):
@@ -165,7 +144,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
         elif uploadtatus=="uploaded":
             #update case status = 2 (uploaded)
-            updatestatus = update_case_status(caseid,2)
+            updatestatus = update_case_generic(caseid,"status",2)
             data = { 
             "status" : "uploaded", 
             "Description" : f"File uploaded successfully and case status updated to: {updatestatus} " 
@@ -174,7 +153,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
         elif uploadtatus=="uploadfailed":
             #update case status = 3 (Upload failed)
-            updatestatus = update_case_status(caseid,3)
+            updatestatus = update_case_generic(caseid,"status",3) 
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"File uploaded failed and case status updated to: {updatestatus} " 
@@ -183,7 +162,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body=json_data, status_code=500,mimetype="application/json")
         else:
             #update case status = 3 (Upload failed)
-            updatestatus = update_case_status(caseid,3)
+            updatestatus = updatestatus = update_case_generic(caseid,"status",3) 
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"Failed to upload file - Unexpected error and case status updated to: {updatestatus} " 
