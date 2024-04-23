@@ -79,10 +79,11 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         # Upload the file to Azure Blob Storage
         blob_client = container_client.upload_blob(name=path, data=file_stream)
         logging.info(f"file uploaded succeeded: {blob_client.ErrorCode}")
-        if blob_client.url: 
-            return "uploaded"
+        logging.info(f"blob file url is: {blob_client.url}")
+        if not blob_client.url: 
+            return "uploadfailed"
         else: 
-           return "uploadfailed"
+           return "uploaded"
     except Exception as e:
         return str(e)
 
