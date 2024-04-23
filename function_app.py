@@ -91,7 +91,7 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
         container_client = blob_service_client.get_container_client(container_name)
         basicPath = f"{main_folder_name}/{folder_name}"
-        path = f"{basicPath}/{filename}"
+        path = f"{basicPath}/source/{filename}"
         #check if file Exists
         blob_get = container_client.get_blob_client(path)
         fileExist = blob_get.exists()
