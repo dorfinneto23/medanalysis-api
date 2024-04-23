@@ -79,7 +79,10 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         # Upload the file to Azure Blob Storage
         blob_client = container_client.upload_blob(name=path, data=file_stream)
         logging.info(f"file uploaded succeeded: {blob_client.ErrorCode}")
-        return blob_client.url
+        if blob_client.url: 
+            return "uploaded"
+        else: 
+           return "uploadfailed"
     except Exception as e:
         return str(e)
 
@@ -129,15 +132,24 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         uploadtatus = upload_to_blob_storage(file, file_name,caseid)
 
         if uploadtatus == "fileExist":
-            return func.HttpResponse(f"file exists", status_code=200)
-        elif uploadtatus:
+            data = { 
+            "status" : "fileExist", 
+            "Description" : "File Exist if you wish to replace it , use another api request for file replacment" 
+             } 
+            json_data = json.dumps(data)
+            return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
+        elif uploadtatus=="uploaded":
             #update case status = 2 (uploaded)
             updatestatus = update_case_status(caseid,2)
-            return func.HttpResponse(f"File uploaded successfully. Blob URL: {uploadtatus} and case status updated {updatestatus}", status_code=200)
-        else:
+            return func.HttpResponse(f"File uploaded successfully and case status updated {updatestatus}", status_code=200)
+        elif uploadtatus=="uploadfailed":
             #update case status = 3 (Upload failed)
             updatestatus = update_case_status(caseid,3)
             return func.HttpResponse("Failed to upload file to Azure Blob Storage.", status_code=500)
+        else:
+            #update case status = 3 (Upload failed)
+            updatestatus = update_case_status(caseid,3)
+            return func.HttpResponse("Failed to upload file - Unexpected error", status_code=500)
     except Exception as e:
         return func.HttpResponse(str(e), status_code=500)
     
