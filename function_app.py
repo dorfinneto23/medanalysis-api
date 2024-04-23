@@ -103,10 +103,10 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         blob_client = container_client.upload_blob(name=path, data=file_stream)
         logging.info(f"file uploaded succeeded")
         logging.info(f"blob file url is: {blob_client.url}")
-        if not blob_client.url: 
-            update_case_generic(caseid,"path",basicPath)
-            return "uploadfailed"
+        if not blob_client.url:
+           return "uploadfailed"
         else: 
+           update_case_generic(caseid,"path",basicPath)
            return "uploaded"
     except Exception as e:
         return str(e)
