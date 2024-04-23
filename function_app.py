@@ -77,6 +77,7 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         #if fileExist==True:
          #   return "fileExist"
         # Upload the file to Azure Blob Storage
+        logging.info(f"before upload file, path value{path}")
         blob_client = container_client.upload_blob(name=path, data=file_stream)
         logging.info(f"file uploaded succeeded: {blob_client.ErrorCode}")
         logging.info(f"blob file url is: {blob_client.url}")
