@@ -60,6 +60,27 @@ def update_case_status(caseid,statusid):
     except Exception as e:
         logging.error(f"Error update case: {str(e)}")
         return False
+    
+# Generic Function to update case  in the 'cases' table
+def update_case_generic(caseid,field,value):
+    try:
+        # Establish a connection to the Azure SQL database
+        conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+        cursor = conn.cursor()
+
+        # Insert new case data into the 'cases' table
+        cursor.execute(f"UPDATE cases SET {field} = ? WHERE id = ?", (value, caseid))
+        conn.commit()
+
+        # Close connections
+        cursor.close()
+        conn.close()
+        
+        logging.info(f"case {caseid} updated field name: {field} , value: {value}")
+        return True
+    except Exception as e:
+        logging.error(f"Error update case: {str(e)}")
+        return False    
 
 # Function to upload a PDF file to Azure Blob Storage
 def upload_to_blob_storage(file_stream, filename,caseid):
@@ -69,7 +90,8 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         folder_name="case-"+caseid
         blob_service_client = BlobServiceClient.from_connection_string(connection_string_blob)
         container_client = blob_service_client.get_container_client(container_name)
-        path = f"{main_folder_name}/{folder_name}/{filename}"
+        basicPath = f"{main_folder_name}/{folder_name}"
+        path = f"{basicPath}/{filename}"
         #check if file Exists
         blob_get = container_client.get_blob_client(path)
         fileExist = blob_get.exists()
@@ -82,6 +104,7 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         logging.info(f"file uploaded succeeded")
         logging.info(f"blob file url is: {blob_client.url}")
         if not blob_client.url: 
+            update_case_generic(caseid,"path",basicPath)
             return "uploadfailed"
         else: 
            return "uploaded"
