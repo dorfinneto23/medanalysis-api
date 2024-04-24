@@ -4,9 +4,12 @@ import pyodbc #for sql connections
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 import json # in order to use json 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient # in order to use azure container storage
+from azure.servicebus import ServiceBusClient, ServiceBusMessage # in order to use azure service bus 
 
 # Azure Blob Storage connection string
 connection_string_blob = os.environ.get('BlobStorageConnString')
+#Azure service bus connection string 
+connection_string_servicebus = os.environ.get('servicebusConnectionString')
 
 # Define connection details
 server = 'medicalanalysis-sqlserver.database.windows.net'
@@ -86,9 +89,31 @@ def upload_to_blob_storage(file_stream, filename,caseid):
            return "uploadfailed"
         else: 
            update_case_generic(caseid,"path",basicPath)
+           create_servicebus_event("ocr",caseid)
            return "uploaded"
     except Exception as e:
         return str(e)
+    
+#Create event on azure service bus 
+def create_servicebus_event(queue_name, event_data):
+    try:
+        # Create a ServiceBusClient using the connection string
+        servicebus_client = ServiceBusClient.from_connection_string(connection_string_servicebus)
+
+        # Create a sender for the queue
+        sender = servicebus_client.get_queue_sender(queue_name)
+
+        with sender:
+            # Create a ServiceBusMessage object with the event data
+            message = ServiceBusMessage(event_data)
+
+            # Send the message to the queue
+            sender.send_messages(message)
+
+        print("Event created successfully.")
+    
+    except Exception as e:
+        print("An error occurred:", str(e))
 
 # Define the Azure Function
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)

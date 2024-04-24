@@ -5,4 +5,5 @@
 azure-functions
 pyodbc
 azure.storage.blob
+azure.servicebus
 
