@@ -187,7 +187,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body=json_data, status_code=500,mimetype="application/json")
         else:
             #update case status = 3 (Upload failed)
-            updatestatus = updatestatus = update_case_generic(caseid,"status",3) 
+            updatestatus =  update_case_generic(caseid,"status",3) 
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"Failed to upload file - Unexpected error and case status updated to: {updatestatus} " 
