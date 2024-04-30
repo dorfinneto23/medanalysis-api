@@ -96,7 +96,7 @@ def upload_to_blob_storage(file_stream, filename,caseid):
                 "Subject" : "Case created successfully!" 
             } 
            json_data = json.dumps(data)
-           create_servicebus_event("ocr",json_data)
+           create_servicebus_event("split",json_data)
            return "uploaded"
     except Exception as e:
         return str(e)
