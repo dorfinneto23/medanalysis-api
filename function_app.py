@@ -89,7 +89,14 @@ def upload_to_blob_storage(file_stream, filename,caseid):
            return "uploadfailed"
         else: 
            update_case_generic(caseid,"path",basicPath)
-           create_servicebus_event("ocr",caseid)
+           #preparing data for service bus 
+           data = { 
+                "caseid" : caseid, 
+                "filename" :filename,
+                "Subject" : "Case created successfully!" 
+            } 
+           json_data = json.dumps(data)
+           create_servicebus_event("ocr",json_data)
            return "uploaded"
     except Exception as e:
         return str(e)
