@@ -55,8 +55,8 @@ def create_case_in_database_storage_table(casename,userid):
     try:
         caseid = get_new_caseid()
         entity = {
-                    'PartitionKey': caseid,
-                    'RowKey': userid,
+                    'PartitionKey': str(caseid),
+                    'RowKey': str(userid),
                     'name':casename
                 }
         table_name = "cases"
