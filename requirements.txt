@@ -6,4 +6,5 @@ azure-functions
 pyodbc
 azure.storage.blob
 azure.servicebus
+azure.data.tables
 

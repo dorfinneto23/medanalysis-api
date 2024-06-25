@@ -4,7 +4,9 @@ import pyodbc #for sql connections
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 import json # in order to use json 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient # in order to use azure container storage
+from azure.data.tables import TableServiceClient, TableClient # in order to use azure storage table 
 from azure.servicebus import ServiceBusClient, ServiceBusMessage # in order to use azure service bus 
+from azure.core.exceptions import ResourceExistsError # in order to use azure storage table   
 
 # Azure Blob Storage connection string
 connection_string_blob = os.environ.get('BlobStorageConnString')
@@ -17,6 +19,63 @@ database = 'medicalanalysis'
 username = os.environ.get('sql_username')
 password = os.environ.get('sql_password')
 driver= '{ODBC Driver 18 for SQL Server}'
+
+
+# Function get the next case id 
+def get_new_caseid():
+ try:
+        table_name = "cases"
+     # Create a TableServiceClient object using the connection string
+        service_client = TableServiceClient.from_connection_string(conn_str=connection_string_blob)
+        
+        # Get the table client
+        table_client = service_client.get_table_client(table_name=table_name)
+        
+        # Query to get the top entity ordered by PartitionKey in descending order
+        query_filter = ""
+        entities = table_client.query_entities(query_filter, results_per_page=1)
+        entities_iter = iter(entities)
+        
+        # Extract the top entity
+        top_entity = next(entities_iter, None)
+        
+        if top_entity:
+            max_caseid = int(top_entity['PartitionKey'])
+            return max_caseid + 1
+        else:
+            return 1  # Return 1 if no entities are found
+
+ except Exception as e:
+        logging.info(f"add_row_to_storage_table:An error occurred: {e}") 
+
+# Function to create a new case in the 'cases' table on storage table 
+def create_case_in_database_storage_table(casename,userid):
+    logging.info(f"starting add_row_to_storage_table function : table name: {table_name}, entity: {entity}")
+      
+    try:
+        caseid = get_new_caseid()
+        entity = {
+                    'PartitionKey': caseid,
+                    'RowKey': userid,
+                    'name':casename
+                }
+        table_name = "cases"
+        # Create a TableServiceClient using the connection string
+        table_service_client = TableServiceClient.from_connection_string(conn_str=connection_string_blob)
+        logging.info(f"add_row_to_storage_table function :Create a TableServiceClient")
+        # Get a TableClient
+        table_client = table_service_client.get_table_client(table_name)
+        logging.info(f"add_row_to_storage_table function :TableClient")
+        # Add the entity to the table
+        table_client.create_entity(entity=entity)
+        logging.info(f"add_row_to_storage_table:Entity added successfully.")
+    except ResourceExistsError:
+        logging.info(f"add_row_to_storage_table:The entity with PartitionKey '{entity['PartitionKey']}' and RowKey '{entity['RowKey']}' already exists.")
+    except Exception as e:
+        logging.info(f"add_row_to_storage_table:An error occurred: {e}")
+
+
+
 
 # Function to create a new case in the 'cases' table
 def create_case_in_database(casename,userid):
@@ -136,6 +195,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     if not casename:
         return func.HttpResponse("Parameter 'casename' is missing in the request.", status_code=400)
     case_id = create_case_in_database(casename,userid)
+    create_case_in_database_storage_table(casename,userid)
     if case_id is not None:
         logging.info(f"case_id contains data , the value is:{case_id}")
         # prepare json data
