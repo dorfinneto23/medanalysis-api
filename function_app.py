@@ -31,19 +31,20 @@ def get_new_caseid():
         # Get the table client
         table_client = service_client.get_table_client(table_name=table_name)
         
-        # Query to get the top entity ordered by PartitionKey in descending order
-        query_filter = ""
-        entities = table_client.query_entities(query_filter, results_per_page=1)
-        entities_iter = iter(entities)
+        # Query all entities in the table
+        entities = list(table_client.list_entities())
         
-        # Extract the top entity
-        top_entity = next(entities_iter, None)
-        
-        if top_entity:
-            max_caseid = int(top_entity['PartitionKey'])
-            return max_caseid + 1
-        else:
+        if not entities:
             return 1  # Return 1 if no entities are found
+
+        # Sort entities by PartitionKey in descending order
+        sorted_entities = sorted(entities, key=lambda x: int(x['PartitionKey']), reverse=True)
+        
+        # Get the top entity
+        top_entity = sorted_entities[0]
+        
+        max_caseid = int(top_entity['PartitionKey'])
+        return max_caseid + 1
 
  except Exception as e:
         logging.info(f"add_row_to_storage_table:An error occurred: {e}") 
