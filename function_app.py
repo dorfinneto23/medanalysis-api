@@ -175,6 +175,7 @@ def upload_to_blob_storage(file_stream, filename,caseid):
            return "uploadfailed"
         else: 
            update_case_generic(caseid,"path",basicPath)
+           update_entity_field("cases", caseid, "1", "path", basicPath)
            #preparing data for service bus 
            data = { 
                 "caseid" : caseid, 
