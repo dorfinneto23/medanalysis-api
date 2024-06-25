@@ -4,9 +4,9 @@ import pyodbc #for sql connections
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 import json # in order to use json 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient # in order to use azure container storage
-from azure.data.tables import TableServiceClient, TableClient # in order to use azure storage table 
+from azure.data.tables import TableServiceClient, TableClient ,UpdateMode# in order to use azure storage table 
 from azure.servicebus import ServiceBusClient, ServiceBusMessage # in order to use azure service bus 
-from azure.core.exceptions import ResourceExistsError # in order to use azure storage table   
+from azure.core.exceptions import ResourceExistsError,ResourceNotFoundError # in order to use azure storage table   
 
 # Azure Blob Storage connection string
 connection_string_blob = os.environ.get('BlobStorageConnString')
@@ -20,6 +20,31 @@ username = os.environ.get('sql_username')
 password = os.environ.get('sql_password')
 driver= '{ODBC Driver 18 for SQL Server}'
 
+
+# Update field on specific entity/ row in storage table 
+def update_entity_field(table_name, partition_key, row_key, field_name, new_value):
+
+    try:
+        # Create a TableServiceClient using the connection string
+        table_service_client = TableServiceClient.from_connection_string(conn_str=connection_string_blob)
+
+        # Get a TableClient
+        table_client = table_service_client.get_table_client(table_name)
+
+        # Retrieve the entity
+        entity = table_client.get_entity(partition_key, row_key)
+
+        # Update the field
+        entity[field_name] = new_value
+
+        # Update the entity in the table
+        table_client.update_entity(entity, mode=UpdateMode.REPLACE)
+        logging.info(f"update_entity_field:Entity updated successfully.")
+
+    except ResourceNotFoundError:
+        logging.info(f"The entity with PartitionKey '{partition_key}' and RowKey '{row_key}' was not found.")
+    except Exception as e:
+        logging.info(f"An error occurred: {e}")
 
 # Function get the next case id 
 def get_new_caseid():
@@ -238,6 +263,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         elif uploadtatus=="uploaded":
             #update case status = 2 (uploaded)
             updatestatus = update_case_generic(caseid,"status",2)
+            update_entity_field("cases",caseid,1,"status",2)
             data = { 
             "status" : "uploaded", 
             "Description" : f"File uploaded successfully and case status updated to: {updatestatus} " 
@@ -247,6 +273,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         elif uploadtatus=="uploadfailed":
             #update case status = 3 (Upload failed)
             updatestatus = update_case_generic(caseid,"status",3) 
+            update_entity_field("cases",caseid,1,"status",3)
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"File uploaded failed and case status updated to: {updatestatus} " 
@@ -256,6 +283,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         else:
             #update case status = 3 (Upload failed)
             updatestatus =  update_case_generic(caseid,"status",3) 
+            update_entity_field("cases",caseid,1,"status",3)
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"Failed to upload file - Unexpected error and case status updated to: {updatestatus} " 
