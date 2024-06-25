@@ -1,6 +1,5 @@
 import azure.functions as func
 import logging
-import pyodbc #for sql connections 
 import os #in order to get parameters values from azure function app enviroment vartiable - sql password for example 
 import json # in order to use json 
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient # in order to use azure container storage
@@ -12,14 +11,6 @@ from azure.core.exceptions import ResourceExistsError,ResourceNotFoundError # in
 connection_string_blob = os.environ.get('BlobStorageConnString')
 #Azure service bus connection string 
 connection_string_servicebus = os.environ.get('servicebusConnectionString')
-
-# Define connection details
-server = 'medicalanalysis-sqlserver.database.windows.net'
-database = 'medicalanalysis'
-username = os.environ.get('sql_username')
-password = os.environ.get('sql_password')
-driver= '{ODBC Driver 18 for SQL Server}'
-
 
 # Update field on specific entity/ row in storage table 
 def update_entity_field(table_name, partition_key, row_key, field_name, new_value):
@@ -96,59 +87,14 @@ def create_case_in_database_storage_table(casename,userid):
         # Add the entity to the table
         table_client.create_entity(entity=entity)
         logging.info(f"create_case_in_database_storage_table:Entity added successfully.")
+        return caseid
     except ResourceExistsError:
         logging.info(f"create_case_in_database_storage_table:The entity with PartitionKey '{entity['PartitionKey']}' and RowKey '{entity['RowKey']}' already exists.")
     except Exception as e:
         logging.info(f"add_row_to_storage_table:An error occurred: {e}")
 
 
-
-
-# Function to create a new case in the 'cases' table
-def create_case_in_database(casename,userid):
-    try:
-        # Establish a connection to the Azure SQL database
-        conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-        cursor = conn.cursor()
-
-        # Insert new case data into the 'cases' table
-        cursor.execute("INSERT INTO cases (name, status,userid) VALUES (?, ?, ?)", (casename, 1,userid))
-        conn.commit()
-
-        # Get the ID of the last inserted row
-        cursor.execute("SELECT @@IDENTITY AS 'Identity';")
-        case_id = cursor.fetchone()[0]
-
-        # Close connections
-        cursor.close()
-        conn.close()
-        
-        logging.info("New case created successfully in the 'cases' table.")
-        return case_id
-    except Exception as e:
-        logging.error(f"Error creating case: {str(e)}")
-        return None
     
-# Generic Function to update case  in the 'cases' table
-def update_case_generic(caseid,field,value):
-    try:
-        # Establish a connection to the Azure SQL database
-        conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
-        cursor = conn.cursor()
-
-        # Insert new case data into the 'cases' table
-        cursor.execute(f"UPDATE cases SET {field} = ? WHERE id = ?", (value, caseid))
-        conn.commit()
-
-        # Close connections
-        cursor.close()
-        conn.close()
-        
-        logging.info(f"case {caseid} updated field name: {field} , value: {value}")
-        return True
-    except Exception as e:
-        logging.error(f"Error update case: {str(e)}")
-        return False    
 
 # Function to upload a PDF file to Azure Blob Storage
 def upload_to_blob_storage(file_stream, filename,caseid):
@@ -174,7 +120,6 @@ def upload_to_blob_storage(file_stream, filename,caseid):
         if not blob_client.url:
            return "uploadfailed"
         else: 
-           update_case_generic(caseid,"path",basicPath)
            update_entity_field("cases", caseid, "1", "path", basicPath)
            #preparing data for service bus 
            data = { 
@@ -222,8 +167,7 @@ def create_case(req: func.HttpRequest) -> func.HttpResponse:
     # Check if casename is provided
     if not casename:
         return func.HttpResponse("Parameter 'casename' is missing in the request.", status_code=400)
-    case_id = create_case_in_database(casename,userid)
-    create_case_in_database_storage_table(casename,userid)
+    case_id = create_case_in_database_storage_table(casename,userid)
     if case_id is not None:
         logging.info(f"case_id contains data , the value is:{case_id}")
         # prepare json data
@@ -264,31 +208,28 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
         elif uploadtatus=="uploaded":
             #update case status = 2 (uploaded)
-            updatestatus = update_case_generic(caseid,"status",2)
             update_entity_field("cases",caseid,"1","status",2)
             data = { 
             "status" : "uploaded", 
-            "Description" : f"File uploaded successfully and case status updated to: {updatestatus} " 
+            "Description" : f"File uploaded successfully and case status updated to: 2 " 
              } 
             json_data = json.dumps(data)
             return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
         elif uploadtatus=="uploadfailed":
             #update case status = 3 (Upload failed)
-            updatestatus = update_case_generic(caseid,"status",3) 
             update_entity_field("cases",caseid,"1","status",3)
             data = { 
             "status" : "uploadfailed", 
-            "Description" : f"File uploaded failed and case status updated to: {updatestatus} " 
+            "Description" : f"File uploaded failed and case status updated to: 3" 
              } 
             json_data = json.dumps(data)
             return func.HttpResponse(body=json_data, status_code=500,mimetype="application/json")
         else:
             #update case status = 3 (Upload failed)
-            updatestatus =  update_case_generic(caseid,"status",3) 
             update_entity_field("cases",caseid,"1","status",3)
             data = { 
             "status" : "uploadfailed", 
-            "Description" : f"Failed to upload file - Unexpected error and case status updated to: {updatestatus} " 
+            "Description" : f"Failed to upload file - Unexpected error and case status updated to: 3 " 
              } 
             json_data = json.dumps(data)
             return func.HttpResponse(body=json_data, status_code=500,mimetype="application/json")
