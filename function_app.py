@@ -263,7 +263,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         elif uploadtatus=="uploaded":
             #update case status = 2 (uploaded)
             updatestatus = update_case_generic(caseid,"status",2)
-            update_entity_field("cases",caseid,1,"status",2)
+            update_entity_field("cases",caseid,"1","status",2)
             data = { 
             "status" : "uploaded", 
             "Description" : f"File uploaded successfully and case status updated to: {updatestatus} " 
@@ -273,7 +273,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         elif uploadtatus=="uploadfailed":
             #update case status = 3 (Upload failed)
             updatestatus = update_case_generic(caseid,"status",3) 
-            update_entity_field("cases",caseid,1,"status",3)
+            update_entity_field("cases",caseid,"1","status",3)
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"File uploaded failed and case status updated to: {updatestatus} " 
@@ -283,7 +283,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         else:
             #update case status = 3 (Upload failed)
             updatestatus =  update_case_generic(caseid,"status",3) 
-            update_entity_field("cases",caseid,1,"status",3)
+            update_entity_field("cases",caseid,"1","status",3)
             data = { 
             "status" : "uploadfailed", 
             "Description" : f"Failed to upload file - Unexpected error and case status updated to: {updatestatus} " 
