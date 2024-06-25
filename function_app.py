@@ -50,7 +50,7 @@ def get_new_caseid():
 
 # Function to create a new case in the 'cases' table on storage table 
 def create_case_in_database_storage_table(casename,userid):
-    logging.info(f"starting add_row_to_storage_table function : table name: {table_name}, entity: {entity}")
+    logging.info(f"starting create_case_in_database_storage_table function : casename: {casename}, userid: {userid}")
       
     try:
         caseid = get_new_caseid()
@@ -62,15 +62,15 @@ def create_case_in_database_storage_table(casename,userid):
         table_name = "cases"
         # Create a TableServiceClient using the connection string
         table_service_client = TableServiceClient.from_connection_string(conn_str=connection_string_blob)
-        logging.info(f"add_row_to_storage_table function :Create a TableServiceClient")
+        logging.info(f"create_case_in_database_storage_table function :Create a TableServiceClient")
         # Get a TableClient
         table_client = table_service_client.get_table_client(table_name)
-        logging.info(f"add_row_to_storage_table function :TableClient")
+        logging.info(f"create_case_in_database_storage_table function :TableClient")
         # Add the entity to the table
         table_client.create_entity(entity=entity)
-        logging.info(f"add_row_to_storage_table:Entity added successfully.")
+        logging.info(f"create_case_in_database_storage_table:Entity added successfully.")
     except ResourceExistsError:
-        logging.info(f"add_row_to_storage_table:The entity with PartitionKey '{entity['PartitionKey']}' and RowKey '{entity['RowKey']}' already exists.")
+        logging.info(f"create_case_in_database_storage_table:The entity with PartitionKey '{entity['PartitionKey']}' and RowKey '{entity['RowKey']}' already exists.")
     except Exception as e:
         logging.info(f"add_row_to_storage_table:An error occurred: {e}")
 
