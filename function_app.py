@@ -83,7 +83,8 @@ def create_case_in_database_storage_table(casename,userid):
         entity = {
                     'PartitionKey': str(caseid),
                     'RowKey': str(userid),
-                    'name':casename
+                    'name':casename,
+                    'status' :1
                 }
         table_name = "cases"
         # Create a TableServiceClient using the connection string
