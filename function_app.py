@@ -73,7 +73,7 @@ def create_case_in_database_storage_table(casename,userid):
         caseid = get_new_caseid()
         entity = {
                     'PartitionKey': str(caseid),
-                    'RowKey': str(userid),
+                    'RowKey': "1",
                     'name':casename,
                     'status' :1
                 }
