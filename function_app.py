@@ -236,6 +236,24 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         return func.HttpResponse(str(e), status_code=500)
     
+@app.route(route="v1/system/create_sb_event", methods=['POST'])
+def create_case(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request for creating a case.')
+    # Extract casename & userid from the request
+    message = req.params.get('message')
+    quename = req.params.get('quename')
+    # Check if casename is provided
+    if not message:
+        return func.HttpResponse("Parameter 'message' is missing in the request.", status_code=400)
+    create_servicebus_event(quename,message)
+    logging.info(f"Event created successfully")
+    # prepare json data
+    data = { 
+            "Subject" : "Event created successfully!" 
+        } 
+    json_data = json.dumps(data)
+    return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
+    
 @app.route(route="v1")
 def v1(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
