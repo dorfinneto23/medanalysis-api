@@ -243,11 +243,12 @@ def create_sb_event(req: func.HttpRequest) -> func.HttpResponse:
     # Extract casename & userid from the request
     quename = req.params.get('quename')
     message = req.get_json()
+    json_data = json.dumps(message)
     # Check if casename is provided
-    logging.info(f'message value is : {message} and quename value is {quename} ')
-    if not message:
+    logging.info(f'message value is : {json_data} and quename value is {quename} ')
+    if not json_data:
         return func.HttpResponse("Parameter 'message' is missing in the request.", status_code=400)
-    create_servicebus_event(quename,message)
+    create_servicebus_event(quename,json_data)
     logging.info(f"Event created successfully")
     # prepare json data
     data = { 
