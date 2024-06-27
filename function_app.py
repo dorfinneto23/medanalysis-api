@@ -237,7 +237,7 @@ def upload_pdf(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(str(e), status_code=500)
     
 @app.route(route="v1/system/create_sb_event", methods=['POST'])
-def create_case(req: func.HttpRequest) -> func.HttpResponse:
+def create_sb_event(req: func.HttpRequest) -> func.HttpResponse:
  try:   
     logging.info('Python HTTP trigger function processed a request for creating a case.')
     # Extract casename & userid from the request
