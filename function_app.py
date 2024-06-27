@@ -241,14 +241,13 @@ def create_sb_event(req: func.HttpRequest) -> func.HttpResponse:
  try:   
     logging.info('Python HTTP trigger function processed a request for creating a case.')
     # Extract casename & userid from the request
-    message = req.params.get('message')
     quename = req.params.get('quename')
+    message = req.get_json()
     # Check if casename is provided
     
     if not message:
         return func.HttpResponse("Parameter 'message' is missing in the request.", status_code=400)
-    json_data = json.dumps(message)
-    create_servicebus_event(quename,json_data)
+    create_servicebus_event(quename,message)
     logging.info(f"Event created successfully")
     # prepare json data
     data = { 
@@ -258,8 +257,8 @@ def create_sb_event(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(body=json_data, status_code=200,mimetype="application/json")
  except:
     return func.HttpResponse("somthing wrong with the request .", status_code=400)
- 
-  
+
+
 @app.route(route="v1")
 def v1(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
